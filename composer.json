@@ -1,0 +1,38 @@
+{
+  "name": "playcat/queue-tpswoole",
+  "description": "playcat queue for webman",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "CGI.NET",
+      "email": "root@playcat.net",
+      "homepage": "https://blog.playcat.net"
+    }
+  ],
+  "homepage": "https://github.com/nsnake/playcat-queue-webman",
+  "require": {
+    "php": ">7.2",
+    "workerman/webman": "^4.1",
+    "playcat/queue-base": "^1.6"
+  },
+  "require-dev": {
+  },
+  "autoload": {
+    "psr-4": {
+      "Playcat\\Queue\\Webman\\": "src"
+    },
+    "files": [
+    ]
+  },
+  "scripts": {
+    "post-install-cmd": [
+    ],
+    "post-update-cmd": [
+    ]
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "platform-check": false
+  }
+}
