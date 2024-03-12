@@ -13,7 +13,8 @@
   "require": {
     "php": ">7.2",
     "workerman/webman": "^4.1",
-    "playcat/queue-base": "^1.6"
+    "playcat/queue-base": "^1.6",
+    "webman/console": *
   },
   "require-dev": {
   },

@@ -36,7 +36,7 @@ $ composer require "playcat/queue-webman"
 #### 1.2 初始化数据库(只需一次)
 
 ```
-php think playcatqueue:timerserver initdb
+php webman timerserver:initdb
 ```
 
 ### 2.创建消费任务

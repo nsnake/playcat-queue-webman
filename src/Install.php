@@ -1,4 +1,5 @@
 <?php
+
 namespace Playcat\Queue\Webman;
 
 class Install
@@ -8,7 +9,10 @@ class Install
     /**
      * @var array
      */
-    protected static $pathRelation = ['config' => 'config/plugin/playcatqueue'];
+    protected static $pathRelation = [
+        'Config' => 'config/plugin/playcatqueue',
+        'Command' => 'app/command',
+    ];
 
     /**
      * Install
@@ -41,7 +45,6 @@ class Install
                     mkdir($parent_dir, 0777, true);
                 }
             }
-            //symlink(__DIR__ . "/$source", base_path()."/$dest");
             copy_dir(__DIR__ . "/$source", base_path() . "/$dest");
             echo "Create $dest
 ";
