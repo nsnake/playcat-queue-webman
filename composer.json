@@ -12,7 +12,7 @@
   "homepage": "https://github.com/nsnake/playcat-queue-webman",
   "require": {
     "php": ">7.2",
-    "webman-framework": "^1.4",
+    "workerman/webman": "^1.4",
     "playcat/queue-base": "^1.6"
   },
   "require-dev": {
