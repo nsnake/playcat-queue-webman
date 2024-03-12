@@ -31,7 +31,7 @@ $ composer require "playcat/queue-webman"
 ### 1.配置
 
 #### 1.1
-编辑根目录下的*config\playcatqueue.php*文件,修改相应内容为自己环境使用的配置。
+编辑 **config\plugin\playcat\queue\** 目录下的**app.php**和*process.php*。修改相应内容为自己环境使用的配置。
 
 #### 1.2 初始化数据库(只需一次)
 
@@ -81,9 +81,6 @@ class playcatConsumer1 implements ConsumerInterface
 
 
 #### 启动服务:
-队列服务分为2个主服务。一个为即时消费服务，另一个为定时消费服务。可以在一台机器上同时启用消费和计时服务,也可以只启用消费服务端而和其它机器使用共同的定时消费服务端。
-
-#### 消费者服务
 
 启动:
 `php start.php start`

@@ -29,7 +29,7 @@ class TimerserverInitdb extends Command
      */
     protected function configure()
     {
-        $this->config = Config('plugin.playcatqueue.TimerServer');
+        $this->config = Config('plugin.playcat.queue.process.TimerServer.constructor');
     }
 
     /**
@@ -46,14 +46,14 @@ class TimerserverInitdb extends Command
         } elseif ($this->config['storage']['type'] == strtolower('sqlite')) {
             $result = $db->initSqlite();
         } else {
-            $output->error("Unsupported database");
+            $output->writeln("Unsupported database");
             return self::FAILURE;
         }
         if ($result) {
             $output->writeln('Initialized successfully！');
             return self::SUCCESS;
         } else {
-            $output->error("Initialized failed！ Maybe already have it！");
+            $output->writeln("Initialized failed！ Maybe already have it！");
             return self::FAILURE;
         }
 
