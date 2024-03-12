@@ -21,7 +21,7 @@ class Manager extends Base
 
     public function __construct()
     {
-        $this->manager_config = Config('plugin.playcatqueue');
+        $this->manager_config = Config('plugin.playcat.queue.app.Manager');
     }
 
     protected function getTimeClient(): StreamSocket

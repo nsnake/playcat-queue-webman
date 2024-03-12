@@ -44,7 +44,7 @@ class ConsumerService
     public function onWorkerStart(Worker $worker)
     {
         if (!is_dir($this->config['consumer_dir'])) {
-            echo "Consumer directory $this->config['consumer_dir'] not exists\r\n";
+            echo "Consumer directory" . $this->config['consumer_dir'] . " not exists\r\n";
             return;
         }
         $manager = Manager::getInstance();

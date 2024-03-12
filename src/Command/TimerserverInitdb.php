@@ -1,6 +1,15 @@
 <?php
+/**
+ *
+ *
+ * @license MIT License (MIT)
+ *
+ * For full copyright and license information, please see the LICENCE files.
+ *
+ * @author CGI.NET
+ */
 
-namespace app\command;
+namespace Playcat\Queue\Webman\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

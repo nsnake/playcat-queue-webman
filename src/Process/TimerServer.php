@@ -2,10 +2,6 @@
 
 namespace Playcat\Queue\Webman\Process;
 
-use Playcat\Queue\Install\InitDB;
-
-
-use think\Exception;
 use ErrorException;
 use Playcat\Queue\Protocols\ProducerData;
 use Playcat\Queue\TimerClient\TimerClientProtocols;
@@ -16,13 +12,17 @@ use Workerman\Worker;
 use Workerman\Connection\TcpConnection;
 
 
-
 class TimerServer
 {
     private $manager;
     private $storage;
     private $iconic_id;
 
+    public function __construct(array $conf = [])
+    {
+        $this->storage = new Storage();
+        $this->storage->setDriver($conf);
+    }
 
     /**
      * onWorkerStart.
@@ -30,6 +30,8 @@ class TimerServer
     public function onWorkerStart(Worker $worker)
     {
         $this->manager = Manager::getInstance();
+        $this->iconic_id = $worker->id;
+        $this->loadUndoJobs();
     }
 
     public function onMessage(TcpConnection $connection, $data)
@@ -37,9 +39,9 @@ class TimerServer
         try {
             $result = '';
             if ($data === '') {
-              throw new ErrorException('');
+                throw new ErrorException('');
             }
-            
+
             $protocols = unserialize($data);
             if ($protocols instanceof TimerClientProtocols) {
                 switch ($protocols->getCMD()) {
@@ -65,14 +67,16 @@ class TimerServer
     private function cmdPush(ProducerData $payload): int
     {
         $jid = $this->storage->addData($this->iconic_id, $payload->getDelayTime(), $payload);
-        $timer_id = Timer::add($payload->getDelayTime() , function (int $jid, Storage $storage) {
+        $timer_id = Timer::add($payload->getDelayTime(), function (int $jid, Storage $storage) {
             $db_data = $storage->getDataById($jid);
-            $payload = $db_data['data'];
-            $payload->setDelayTime();
-            if ($this->manager->push($payload)) {
-                $storage->delData($jid);
+            if ($db_data) {
+                $payload = $db_data['data'];
+                $payload->setDelayTime();
+                if ($this->manager->push($payload)) {
+                    $storage->delData($jid);
+                }
             }
-        }, $jid, $this->storage);
+        }, [$jid, $this->storage], false);
         $this->storage->upData($jid, $timer_id);
         return $jid;
     }

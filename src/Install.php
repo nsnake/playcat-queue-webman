@@ -1,4 +1,13 @@
 <?php
+/**
+ *
+ *
+ * @license MIT License (MIT)
+ *
+ * For full copyright and license information, please see the LICENCE files.
+ *
+ * @author CGI.NET
+ */
 
 namespace Playcat\Queue\Webman;
 
@@ -10,8 +19,7 @@ class Install
      * @var array
      */
     protected static $pathRelation = [
-        'Config' => 'config/plugin/playcatqueue',
-        'Command' => 'app/command',
+        'Config' => 'config/plugin/playcat/queue'
     ];
 
     /**
