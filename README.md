@@ -96,9 +96,8 @@ class playcatConsumer1 implements ConsumerInterface
 ### 添加任务并且提交到队列中
 
 ```php
-use Playcat\Queue\Manager;
+use Playcat\Queue\Webman\Manager;
 use Playcat\Queue\Protocols\ProducerData;
-//使用协程的方式,如果需要并行数据发布需要自行实现Manager的连接池
   //即时消费消息
   $payload = new ProducerData();
   //对应消费队列里的任务名称
@@ -138,7 +137,7 @@ use Playcat\Queue\Protocols\ProducerData;
 ### 其它
 
 基于tp和swoole的队列系统
-[playcat-queue ](https://github.com/nsnake/playcat-queue-tpswoole)
+[playcat-queue-tpswoole](https://github.com/nsnake/playcat-queue-tpswoole)
 
 QQ:318274085
 
