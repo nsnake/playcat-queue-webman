@@ -11,14 +11,16 @@
 
 namespace Playcat\Queue\Webman\Process;
 
-use Workerman\Worker;
-use Workerman\Timer;
+
 use Playcat\Queue\Util\Container;
 use Playcat\Queue\Exceptions\QueueDontRetry;
 use Playcat\Queue\Protocols\ConsumerData;
 use Playcat\Queue\Protocols\ProducerData;
 use Playcat\Queue\Webman\Manager;
 use Exception;
+use Workerman\Worker;
+use Workerman\Timer;
+use support\Log;
 
 class ConsumerService
 {
@@ -44,7 +46,7 @@ class ConsumerService
     public function onWorkerStart(Worker $worker)
     {
         if (!is_dir($this->config['consumer_dir'])) {
-            echo "Consumer directory" . $this->config['consumer_dir'] . " not exists\r\n";
+            log::error('Consumer directory' . $this->config['consumer_dir'] . ' not exists');
             return;
         }
         $manager = Manager::getInstance();
@@ -53,12 +55,13 @@ class ConsumerService
         try {
             $consumers = $this->loadWorkTask($this->config['consumer_dir']);
         } catch (Exception $e) {
-            echo 'Error while loading consumers: ' . $e->getMessage() . "\r\n";
+            log::error('Error while loading consumers: ' . $e->getMessage());
             return;
         }
 
         $manager->subscribe(array_keys($consumers));
 
+        log::info('Start Consumer Service!');
         $this->pull_timing = Timer::add(0.1, function ($config) use ($manager, $consumers) {
             $payload = $manager->shift();
             if (($payload instanceof ConsumerData)) {
@@ -66,7 +69,7 @@ class ConsumerService
                     try {
                         call_user_func([$consumers[$payload->getChannel()], 'consume'], $payload);
                     } catch (QueueDontRetry $e) {
-
+                        log::alert('Caught an exception but not need retry it!', $payload);
                     } catch (Exception $e) {
                         if (
                             isset ($config['max_attempts'])
@@ -86,8 +89,9 @@ class ConsumerService
                         $manager->consumerFinished();
                     }
                 }
+            } else {
+                $manager->consumerFinished();
             }
-
         }, [$this->config]);
     }
 
@@ -116,6 +120,7 @@ class ConsumerService
                 $consumer = Container::instance()->get($class);
                 $channel = $consumer->queue;
                 $consumers[$channel] = $consumer;
+                log::debug('Load task name:' . $channel);
             }
         }
         return $consumers;
