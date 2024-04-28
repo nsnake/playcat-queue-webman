@@ -64,12 +64,12 @@ class ConsumerService
         log::info('Start Consumer Service!');
         $this->pull_timing = Timer::add(0.1, function ($config) use ($manager, $consumers) {
             $payload = $manager->shift();
-            if (($payload instanceof ConsumerData)) {
+            if ($payload instanceof ConsumerData) {
                 if (!empty ($consumers[$payload->getChannel()])) {
                     try {
                         call_user_func([$consumers[$payload->getChannel()], 'consume'], $payload);
                     } catch (QueueDontRetry $e) {
-                        log::alert('Caught an exception but not need retry it!', $payload);
+                        log::alert('Caught an exception but not need retry it!', $payload->getQueueData());
                     } catch (Exception $e) {
                         if (
                             isset ($config['max_attempts'])
@@ -89,7 +89,7 @@ class ConsumerService
                         $manager->consumerFinished();
                     }
                 }
-            } else {
+            } elseif($payload) {
                 $manager->consumerFinished();
             }
         }, [$this->config]);
