@@ -104,7 +104,7 @@ use Playcat\Queue\Protocols\ProducerData;
   $payload->setChannel('test');
   //对应消费队列里的任务使用的数据
   $payload->setQueueData([1,2,3,4]);
-  //推入队列并且获取消息id
+  //推入队列并且获取消息的唯一id
   $id = Manager::getInstance()->push($payload);
 
   //延迟消费消息
@@ -113,19 +113,25 @@ use Playcat\Queue\Protocols\ProducerData;
   $payload_delay->setQueueData([6,7,8,9]);
   //设置60秒后执行的任务
   $payload_delay->setDelayTime(60);
-  //推入队列并且获取消息id
+  //推入队列并且获取消息的唯一id
   $id = Manager::getInstance()->push($payload_delay);
   //取消延迟消息
   Manager::getInstance()->del($id);
-
 ```
 
-### ProducerData方法
 
+### ProducerData
+#### 方法:
 - setChannel: 设置推入消息的队列名称
 - setQueueData: 设置传入到消费任务的数据
 - setDelayTime: 设置延迟时间(秒)
 - - -
+
+### Manager
+#### 方法:
+- getInstance: 创建一个单例模式
+- push(ProducerData): 推入生产者数据
+- del
 
 ### 异常与重试机制
 
@@ -139,6 +145,12 @@ use Playcat\Queue\Protocols\ProducerData;
 基于tp和swoole的队列系统
 [playcat-queue-tpswoole](https://github.com/nsnake/playcat-queue-tpswoole)
 
+基于webman的队列系统
+[playcat-queue-webman](https://github.com/nsnake/playcat-queue-webman)
+
+更多说明: https://github.com/nsnake/playcat-queue-doc
+
+### 联系
 QQ:318274085
 
 ## License

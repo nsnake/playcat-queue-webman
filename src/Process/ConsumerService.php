@@ -20,8 +20,7 @@ use Playcat\Queue\Webman\Manager;
 use Exception;
 use Workerman\Worker;
 use Workerman\Timer;
-use support\Log;
-
+use Playcat\Queue\Log\Log;
 class ConsumerService
 {
 
@@ -38,6 +37,7 @@ class ConsumerService
         $this->config['consumer_dir'] = $consumer_dir;
         $this->config['max_attempts'] = $max_attempts;
         $this->config['retry_seconds'] = $retry_seconds;
+        Log::setLogHandle(\support\Log::class);
     }
 
     /**
@@ -46,7 +46,7 @@ class ConsumerService
     public function onWorkerStart(Worker $worker)
     {
         if (!is_dir($this->config['consumer_dir'])) {
-            log::error('Consumer directory' . $this->config['consumer_dir'] . ' not exists');
+            Log::emergency('Consumer directory' . $this->config['consumer_dir'] . ' not exists');
             return;
         }
         $manager = Manager::getInstance();
@@ -55,13 +55,13 @@ class ConsumerService
         try {
             $consumers = $this->loadWorkTask($this->config['consumer_dir']);
         } catch (Exception $e) {
-            log::error('Error while loading consumers: ' . $e->getMessage());
+            Log::emergency('Error while loading consumers: ' . $e->getMessage());
             return;
         }
 
         $manager->subscribe(array_keys($consumers));
 
-        log::info('Start Consumer Service!');
+        Log::info('Start Consumer Service!');
         $this->pull_timing = Timer::add(0.1, function ($config) use ($manager, $consumers) {
             $payload = $manager->shift();
             if ($payload instanceof ConsumerData) {
@@ -69,7 +69,7 @@ class ConsumerService
                     try {
                         call_user_func([$consumers[$payload->getChannel()], 'consume'], $payload);
                     } catch (QueueDontRetry $e) {
-                        log::alert('Caught an exception but not need retry it!', $payload->getQueueData());
+                        Log::alert('Caught an exception but not need retry it!', $payload->getQueueData());
                     } catch (Exception $e) {
                         if (
                             isset ($config['max_attempts'])
@@ -120,7 +120,7 @@ class ConsumerService
                 $consumer = Container::instance()->get($class);
                 $channel = $consumer->queue;
                 $consumers[$channel] = $consumer;
-                log::debug('Load task name:' . $channel);
+                Log::debug('Load task name:' . $channel);
             }
         }
         return $consumers;
