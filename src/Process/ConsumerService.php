@@ -21,6 +21,7 @@ use Exception;
 use Workerman\Worker;
 use Workerman\Timer;
 use Playcat\Queue\Log\Log;
+
 class ConsumerService
 {
 
@@ -61,7 +62,7 @@ class ConsumerService
 
         $manager->subscribe(array_keys($consumers));
 
-        Log::info('Start Consumer Service!');
+        Log::info('Start Playcat Queue Consumer Service!');
         $this->pull_timing = Timer::add(0.1, function ($config) use ($manager, $consumers) {
             $payload = $manager->shift();
             if ($payload instanceof ConsumerData) {
@@ -89,7 +90,7 @@ class ConsumerService
                         $manager->consumerFinished();
                     }
                 }
-            } elseif($payload) {
+            } elseif ($payload) {
                 $manager->consumerFinished();
             }
         }, [$this->config]);
