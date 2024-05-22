@@ -10,7 +10,7 @@ use Playcat\Queue\TimerServer\Storage;
 use Workerman\Timer;
 use Workerman\Worker;
 use Workerman\Connection\TcpConnection;
-
+use Playcat\Queue\Log\Log;
 
 class TimerServer
 {
@@ -31,6 +31,7 @@ class TimerServer
     {
         $this->manager = Manager::getInstance();
         $this->iconic_id = $worker->id;
+        Log::info('Start Timer Server!');
         $this->loadUndoJobs();
     }
 
@@ -39,7 +40,7 @@ class TimerServer
         try {
             $result = '';
             if ($data === '') {
-                throw new ErrorException('');
+                throw new ErrorException('Unsupported protocols!', 100);
             }
 
             $protocols = unserialize($data);
@@ -56,7 +57,7 @@ class TimerServer
             }
             $connection->send(json_encode(['code' => 200, 'msg' => 'ok', 'data' => $result]));
         } catch (ErrorException $e) {
-            $connection->send($this->resultData($result, 401, 'Unsupported protocols!'));
+            $connection->send($this->resultData($result, 401, $e->getMessage()));
         }
     }
 
@@ -115,7 +116,9 @@ class TimerServer
      */
     private function loadUndoJobs(): void
     {
+        Log::info('Load jobs！');
         $jobs = $this->storage->getHistoryJobs();
+        Log::debug('unfinished jobs:' . count($jobs));
         foreach ($jobs as $job) {
             $left_time = $job['expiration'] - time();
             $payload = $job['data'];
@@ -128,6 +131,7 @@ class TimerServer
             }
             $this->storage->delData($job['jid']);
         }
+        Log::info('Load jobs complete！');
     }
 
 }
