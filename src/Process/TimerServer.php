@@ -39,7 +39,7 @@ class TimerServer
      */
     public function onWorkerStart(Worker $worker)
     {
-        Log::info('Start Playcat Timerserver!');
+        Log::info('Start Timerserver!');
         $this->manager = Manager::getInstance();
         $this->iconic_id = $worker->id;
         $this->loadUndoJobs();
