@@ -20,6 +20,7 @@ class TimerServer
 
     public function __construct(array $conf = [])
     {
+        Log::setLogHandle(\support\Log::class);
         $this->storage = new Storage();
         $this->storage->setDriver($conf);
     }

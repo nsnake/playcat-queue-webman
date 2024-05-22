@@ -6,6 +6,7 @@ namespace Playcat\Queue\Webman;
 use Playcat\Queue\TimerClient\TimerClientInterface;
 use Playcat\Queue\TimerClient\StreamSocket;
 use Playcat\Queue\Manager\Base;
+use Playcat\Queue\Log\Log;
 
 class Manager extends Base
 {
@@ -20,6 +21,7 @@ class Manager extends Base
     public function __construct()
     {
         $this->manager_config = Config('plugin.playcat.queue.app.Manager');
+        Log::setLogHandle(\support\Log::class);
     }
 
     protected function getTimeClient(): StreamSocket
