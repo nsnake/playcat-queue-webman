@@ -1,4 +1,13 @@
 <?php
+/**
+ *
+ *
+ * @license MIT License (MIT)
+ *
+ * For full copyright and license information, please see the LICENCE files.
+ *
+ * @author CGI.NET
+ */
 
 namespace Playcat\Queue\Webman\Process;
 
@@ -30,9 +39,9 @@ class TimerServer
      */
     public function onWorkerStart(Worker $worker)
     {
+        Log::info('Start Playcat Timerserver!');
         $this->manager = Manager::getInstance();
         $this->iconic_id = $worker->id;
-        Log::info('Start Timer Server!');
         $this->loadUndoJobs();
     }
 
@@ -58,6 +67,7 @@ class TimerServer
             }
             $connection->send(json_encode(['code' => 200, 'msg' => 'ok', 'data' => $result]));
         } catch (ErrorException $e) {
+            Log::critical($e->getMessage());
             $connection->send($this->resultData($result, 401, $e->getMessage()));
         }
     }
@@ -117,9 +127,9 @@ class TimerServer
      */
     private function loadUndoJobs(): void
     {
-        Log::info('Load jobs！');
+        Log::info('Load unfinished jobs！');
         $jobs = $this->storage->getHistoryJobs();
-        Log::debug('unfinished jobs:' . count($jobs));
+        Log::debug('Unfinished jobs:' . count($jobs));
         foreach ($jobs as $job) {
             $left_time = $job['expiration'] - time();
             $payload = $job['data'];
@@ -132,7 +142,7 @@ class TimerServer
             }
             $this->storage->delData($job['jid']);
         }
-        Log::info('Load jobs complete！');
+        Log::info('Load unfinished jobs complete！');
     }
 
 }
