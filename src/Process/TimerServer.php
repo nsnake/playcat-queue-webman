@@ -49,6 +49,7 @@ class TimerServer
     {
         try {
             $result = '';
+            $data = trim($data);
             if ($data === '') {
                 throw new ErrorException('Unsupported protocols!', 100);
             }
