@@ -13,7 +13,7 @@
   "require": {
     "php": ">=7.2",
     "workerman/webman": "*",
-    "playcat/queue-base": "^1.11"
+    "playcat/queue-base": "^1.11.2"
   },
   "require-dev": {
   },

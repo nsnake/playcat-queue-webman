@@ -51,12 +51,15 @@ class TimerServer
             $result = '';
             $data = trim($data);
             if ($data === '') {
-                throw new ErrorException('Unsupported protocols!', 100);
+                throw new ErrorException('Unsupported protocols!', 401);
             }
 
             $protocols = unserialize($data);
             if ($protocols instanceof TimerClientProtocols) {
                 switch ($protocols->getCMD()) {
+                    case TimerClientProtocols::CMD_PING:
+                        $result = 'pong';
+                        break;
                     case TimerClientProtocols::CMD_PUSH:
                         $result = $this->cmdPush($protocols->getPayload());
                         break;
@@ -69,7 +72,7 @@ class TimerServer
             $connection->send(json_encode(['code' => 200, 'msg' => 'ok', 'data' => $result]));
         } catch (ErrorException $e) {
             Log::critical($e->getMessage());
-            $connection->send($this->resultData($result, 401, $e->getMessage()));
+            $connection->send($this->resultData($result, $e->getCode(), $e->getMessage()));
         }
     }
 
@@ -95,7 +98,7 @@ class TimerServer
     }
 
     /**
-     * @param int $jid
+     * @param ProducerData $payload
      * @return int
      */
     private function cmdDel(ProducerData $payload): int
