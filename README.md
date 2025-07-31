@@ -41,21 +41,29 @@ php webman timerserver:initdb
 
 ### 2.创建消费任务
 
-#### 新建一个php的文件并且添加以下内容:
+#### 创建一个php的文件并添加以下内容:
 
 ```php
 <?php
 
-namespace app\queue\playcat;
-
-use Playcat\Queue\Protocols\ConsumerDataInterface;
+namespace app\playcat\queue;
 use Playcat\Queue\Protocols\ConsumerInterface;
+use Playcat\Queue\Protocols\ConsumerData;
 
 class playcatConsumer1 implements ConsumerInterface
 {
     //任务名称，对应发布消息的名称
+    //如果没有设置将直接使用类名替代(本例为playcatConsumer1,注意大小写),后继该属性会被取消掉以便更好理解.
     public $queue = 'playcatqueue';
-
+    
+    /**
+    * 初始化执行,只在该类首次加载时执行一次,以便执行一些耗时间的操作，例数据库连接或者初始化一些数据等,该方法不接收和返回参数,可不写。
+    */
+    public function onInit():void
+    {
+       ...
+    }
+    
     public function consume(ConsumerData $payload)
     {
         //获取发布到队列时传入的内容

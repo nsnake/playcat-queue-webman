@@ -27,6 +27,7 @@ class ConsumerService
 
     private $pull_timing;
     private $config;
+    const rtime_ms = 0.1; // 100ms
 
     /**
      * @param string $consumer_dir
@@ -62,15 +63,15 @@ class ConsumerService
 
         $manager->subscribe(array_keys($consumers));
 
-        Log::info('Start Consumer Service!');
-        $this->pull_timing = Timer::add(0.1, function ($config) use ($manager, $consumers) {
+        Log::info('PlaycatQueue start consumer service!');
+        $this->pull_timing = Timer::add(self::rtime_ms, function ($config) use ($manager, $consumers) {
             $payload = $manager->shift();
             if ($payload instanceof ConsumerData) {
                 if (!empty ($consumers[$payload->getChannel()])) {
                     try {
                         call_user_func([$consumers[$payload->getChannel()], 'consume'], $payload);
                     } catch (QueueDontRetry $e) {
-                        Log::alert('Caught an exception but not need retry it!', $payload->getQueueData());
+                        Log::alert('PlaycatQueue caught an exception but not need retry it!', $payload->getQueueData());
                     } catch (Exception $e) {
                         if (
                             isset ($config['max_attempts'])
@@ -86,6 +87,7 @@ class ConsumerService
                             );
                             $manager->push($producer_data);
                         }
+                        Log::error('PlaycatQueue consumer error: ' . $e->getMessage());
                     } finally {
                         $manager->consumerFinished();
                     }
@@ -112,18 +114,53 @@ class ConsumerService
      * @return array
      * @throws Exception
      */
-    protected function loadWorkTask(string $dir = ''): array
+    protected function loadWorkTask(string $dir): array
     {
+        if (!$dir || !is_dir($dir)) {
+            throw new \InvalidArgumentException("PlaycatQueue invalid consumer directory: {$dir}");
+        }
+
         $consumers = [];
-        foreach (glob($dir . '/*.php') as $file) {
-            $class = str_replace('/', "\\", substr(substr($file, strlen(base_path())), 0, -4));
-            if (is_a($class, 'Playcat\Queue\Protocols\ConsumerInterface', true)) {
-                $consumer = Container::instance()->get($class);
-                $channel = $consumer->queue;
+        $files = glob($dir . '/*.php');
+
+        if ($files === false) {
+            throw new \RuntimeException("PlaycatQueue failed to scan directory: {$dir}");
+        }
+
+        foreach ($files as $file) {
+            try {
+                $autoload_class = str_replace(['/', '.php'], ['\\', ''], substr($file, strlen(base_path())));
+
+                if (!class_exists($autoload_class)) {
+                    Log::warning("PlaycatQueue can not found class: {$autoload_class}");
+                    continue;
+                }
+
+                if (!is_a($autoload_class, 'Playcat\Queue\Protocols\ConsumerInterface', true)) {
+                    continue;
+                }
+
+                $consumer = Container::instance()->get($autoload_class);
+                if (isset($consumer->queue) && !empty($consumer->queue)) {
+                    $channel = $consumer->queue;
+                } else {
+                    $channel = substr($autoload_class, strrpos($autoload_class, '\\') + 1);;
+                }
                 $consumers[$channel] = $consumer;
-                Log::debug('Load task name:' . $channel);
+                if (is_callable([$consumer, 'onInit'])) {
+                    call_user_func([$consumer, 'onInit']);
+                }
+                Log::info("PlaycatQueue loaded consumer channel, name: {$channel}");
+            } catch (\Throwable $e) {
+                Log::warning("PlaycatQueue load consumer failed: {$file}: " . $e->getMessage());
+                continue;
             }
         }
+
+        if (empty($consumers)) {
+            Log::warning("PlaycatQueue no valid consumers found in {$dir}");
+        }
+
         return $consumers;
     }
 }
