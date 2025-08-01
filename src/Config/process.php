@@ -36,7 +36,9 @@ return [
                 //数据库密码
                 'password' => '',
                 //数据库连接端口
-                'hostport' => ''
+                'hostport' => '',
+                //是否开启断线重连
+                'break_reconnect' => true
             ]
         ]
     ],
