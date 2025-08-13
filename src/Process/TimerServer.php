@@ -131,9 +131,9 @@ class TimerServer
      */
     private function loadUndoJobs(): void
     {
-        Log::info('Load unfinished jobs！');
+        Log::info('PQ: Load unfinished jobs！');
         $jobs = $this->storage->getHistoryJobs();
-        Log::debug('Unfinished jobs:' . count($jobs));
+        Log::debug('PQ: Unfinished jobs' . count($jobs));
         foreach ($jobs as $job) {
             $left_time = $job['expiration'] - time();
             $payload = $job['data'];
@@ -146,7 +146,7 @@ class TimerServer
             }
             $this->storage->delData($job['jid']);
         }
-        Log::info('Load unfinished jobs complete！');
+        Log::info('PQ: Load unfinished jobs complete！');
     }
 
 }
