@@ -14,8 +14,8 @@
 
 ## 模块与版本
 
-- PHP >= 7.2
-- webman >= 1.4
+- PHP >= 8.1
+- webman >= 1.6
 - Redis扩展
 - RdKafka扩展
 - php-amqplib/php-amqplib扩展
@@ -52,9 +52,8 @@ use Playcat\Queue\Protocols\ConsumerData;
 
 class playcatConsumer1 implements ConsumerInterface
 {
-    //任务名称，对应发布消息的名称
-    //如果没有设置将直接使用类名替代(本例为playcatConsumer1,注意大小写),后继该属性会被取消掉以便更好理解.
-    public $queue = 'playcatqueue';
+    //任务名称，对应发布消息的名称(已废弃)
+    //public $queue = 'playcatqueue';
     
     /**
     * 初始化执行,只在该类首次加载时执行一次,以便执行一些耗时间的操作，例数据库连接或者初始化一些数据等,该方法不接收和返回参数,可不写。
