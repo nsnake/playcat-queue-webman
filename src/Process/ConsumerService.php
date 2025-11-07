@@ -73,18 +73,18 @@ class ConsumerService
                     } catch (QueueDontRetry $e) {
                         Log::alert('PlaycatQueue caught an exception but not need retry it!', $payload->getQueueData());
                     } catch (Exception $e) {
-                        if (
-                            isset ($config['max_attempts'])
-                            && $config['max_attempts'] > 0
-                            && $config['max_attempts'] > $payload->getRetryCount()
-                        ) {
+                        $max_attempts = defined(get_class($consumers[$payload->getChannel()]) . '::MAX_ATTEMPTS') && !is_null(($consumers[$payload->getChannel()])::MAX_ATTEMPTS)
+                            ? ($consumers[$payload->getChannel()])::MAX_ATTEMPTS
+                            : $config['max_attempts'];
+                        $retry_seconds = defined(get_class($consumers[$payload->getChannel()]) . '::RETRY_SECONDS') && !is_null(($consumers[$payload->getChannel()])::RETRY_SECONDS)
+                            ? ($consumers[$payload->getChannel()])::RETRY_SECONDS
+                            : $config['retry_seconds'];
+                        if ($max_attempts > 0 && --$max_attempts > $payload->getRetryCount()) {
                             $producer_data = new ProducerData();
                             $producer_data->setChannel($payload->getChannel());
                             $producer_data->setQueueData($payload->getQueueData());
                             $producer_data->setRetryCount($payload->getRetryCount() + 1);
-                            $producer_data->setDelayTime(
-                                pow($config['retry_seconds'], $producer_data->getRetryCount())
-                            );
+                            $producer_data->setDelayTime(pow($retry_seconds, $producer_data->getRetryCount()));
                             $manager->push($producer_data);
                         }
                         Log::error('PlaycatQueue consumer error: ' . $e->getMessage());
@@ -141,11 +141,9 @@ class ConsumerService
                 }
 
                 $consumer = Container::instance()->get($autoload_class);
-                if (isset($consumer->queue) && !empty($consumer->queue)) {
-                    $channel = $consumer->queue;
-                } else {
-                    $channel = substr($autoload_class, strrpos($autoload_class, '\\') + 1);;
-                }
+                $channel = isset($consumer->queue) && !empty($consumer->queue)
+                    ? $consumer->queue
+                    : substr($autoload_class, strrpos($autoload_class, '\\') + 1);
                 $consumers[$channel] = $consumer;
                 if (is_callable([$consumer, 'onInit'])) {
                     call_user_func([$consumer, 'onInit']);

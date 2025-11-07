@@ -1,8 +1,7 @@
 
-<h1 align="center">Playcat\Queue\Webman</h1>
+# **Playcat\Queue\Webman**
 
-<p align="center">基于Webman的消息队列服务
-支持 Redis、Kafka 和 RabbitMQ等多种驱动，自带延迟消息和异常重试，开发简单</p>
+#### 简单易用的消息队列处理系统
 
 ## 特性
 
@@ -12,13 +11,26 @@
 - 支持延迟消息数据持久化
 - 自定义异常与重试流程
 
-## 模块与版本
+## 依赖版本
 
 - PHP >= 8.1
 - webman >= 1.6
-- Redis扩展
-- RdKafka扩展
-- php-amqplib/php-amqplib扩展
+- msgpack
+- Redis
+- RdKafka
+- php-amqplib/php-amqplib
+
+### 依赖安装
+
+```shell
+#RH,CentOS 7 
+sudo yum install php-pecl-redis5 php-pecl-msgpack
+sudo yum install php-pecl-rdkafka5 #(使用Kafka必须)
+
+#RH,CentOS,Rock 8及以上
+sudo dnf install php-pecl-redis6 php-pecl-msgpack
+sudo dnf install php-pecl-rdkafka6 #(使用Kafka必须)
+```
 
 ## 安装
 在Webman项目下执行
@@ -47,20 +59,24 @@ php webman timerserver:initdb
 <?php
 
 namespace app\playcat\queue;
-use Playcat\Queue\Protocols\ConsumerInterface;
+use Playcat\Queue\Protocols\ConsumerBase;
 use Playcat\Queue\Protocols\ConsumerData;
 
-class playcatConsumer1 implements ConsumerInterface
+class SmsSend extends ConsumerBase
 {
-    //任务名称，对应发布消息的名称(已废弃)
+    //2.0新增,可以针对不同的队列设置最大重试次数和重试间隔时间,如不设置则使用全局配置
+    //public const MAX_ATTEMPTS = 3;
+    //public const RETRY_SECONDS = 1;
+    
+    //消费队列别名,如果不指定则使用类名作为队列名称(不建议继续使用)
     //public $queue = 'playcatqueue';
     
     /**
-    * 初始化执行,只在该类首次加载时执行一次,以便执行一些耗时间的操作，例数据库连接或者初始化一些数据等,该方法不接收和返回参数,可不写。
+    * 1.12新增初始化执行,只在该类首次加载时执行一次,以便执行一些耗时间的操作，例数据库连接或者初始化一些数据等,该方法不接收和返回参数,可不写。
     */
     public function onInit():void
     {
-       ...
+        //...你自己的初始化逻辑
     }
     
     public function consume(ConsumerData $payload)
